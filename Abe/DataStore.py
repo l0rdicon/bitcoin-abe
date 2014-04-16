@@ -60,26 +60,7 @@ CONFIG_DEFAULTS = {
 WORK_BITS = 304  # XXX more than necessary.
 
 CHAIN_CONFIG = [
-    {"chain":"Bitcoin"},
-    {"chain":"Testnet"},
-    {"chain":"Namecoin"},
-    {"chain":"Weeds", "policy":"Sha256Chain",
-     "code3":"WDS", "address_version":"\xf3", "magic":"\xf8\xbf\xb5\xda"},
-    {"chain":"BeerTokens", "policy":"Sha256Chain",
-     "code3":"BER", "address_version":"\xf2", "magic":"\xf7\xbf\xb5\xdb"},
-    {"chain":"SolidCoin", "policy":"Sha256Chain",
-     "code3":"SCN", "address_version":"\x7d", "magic":"\xde\xad\xba\xbe"},
-    {"chain":"ScTestnet", "policy":"Sha256Chain",
-     "code3":"SC0", "address_version":"\x6f", "magic":"\xca\xfe\xba\xbe"},
-    {"chain":"Worldcoin", "policy":"Sha256Chain",
-     "code3":"WDC", "address_version":"\x49", "magic":"\xfb\xc0\xb6\xdb"},
-    {"chain":"NovaCoin"},
-    {"chain":"CryptoCash"},
-    {"chain":"Anoncoin", "policy":"Sha256Chain",
-     "code3":"ANC", "address_version":"\x17", "magic":"\xFA\xCA\xBA\xDA" },
-    {"chain":"Hirocoin"},
-    {"chain":"Bitleu"},
-    {"chain":"Maxcoin"},
+    {"chain":"Clam"},
     #{"chain":"",
     # "code3":"", "address_version":"\x", "magic":""},
     ]
@@ -724,7 +705,8 @@ store._ddl['configvar'],
     tx_hash       BINARY(32)  UNIQUE NOT NULL,
     tx_version    NUMERIC(10),
     tx_lockTime   NUMERIC(10),
-    tx_size       NUMERIC(10)
+    tx_size       NUMERIC(10),
+    tx_comment    VARCHAR(160) NULL
 )""",
 
 # Presence of transactions in blocks is many-to-many.
@@ -1730,7 +1712,8 @@ store._ddl['txout_approx'],
             'version':               block_version,
             }
 
-        is_stake_chain = chain is not None and chain.has_feature('nvc_proof_of_stake')
+        #is_stake_chain = chain is not None and chain.has_feature('nvc_proof_of_stake')
+	is_stake_chain = True
         if is_stake_chain:
             # Proof-of-stake display based loosely on CryptoManiac/novacoin and
             # http://nvc.cryptocoinexplorer.com.
@@ -1929,7 +1912,7 @@ store._ddl['txout_approx'],
         tx['version' if is_bin else 'ver']        = int(row[1])
         tx['lockTime' if is_bin else 'lock_time'] = int(row[2])
         tx['size'] = int(row[3])
-	tx['tx-comment'] = str(row[4])
+	tx['comment'] = str(row[4])
 
         txins = []
         tx['txIn' if is_bin else 'in'] = txins
@@ -2006,7 +1989,7 @@ store._ddl['txout_approx'],
             raise MalformedHash()
 
         row = store.selectrow("""
-            SELECT tx_id, tx_version, tx_lockTime, tx_size
+            SELECT tx_id, tx_version, tx_lockTime, tx_size, tx_comment
               FROM tx
              WHERE tx_hash = ?
         """, (dbhash,))
@@ -2019,6 +2002,7 @@ store._ddl['txout_approx'],
             'version': int(row[1]),
             'lockTime': int(row[2]),
             'size': int(row[3]),
+	    'comment': str(row[4]),
             }
 
         def parse_tx_cc(row):
@@ -2893,6 +2877,7 @@ store._ddl['txout_approx'],
                 ds.read_cursor = offset
                 break
             end = ds.read_cursor + length
+
 
             hash = chain.ds_block_header_hash(ds)
 

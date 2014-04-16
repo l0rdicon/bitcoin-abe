@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# Copyright(C) 2011,2012,2013,2014 by Abe developers.
+#opyright(C) 2011,2012,2013,2014 by Abe developers.
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -686,17 +685,16 @@ class Abe:
             body += ['<p class="error">Not a valid transaction hash.</p>']
             return
 
-        row = abe.store.selectrow("""
-            SELECT tx_id, tx_version, tx_lockTime, tx_size, tx_comment
-              FROM tx
-             WHERE tx_hash = ?
-        """, (abe.store.hashin_hex(tx_hash),))
-        if row is None:
+        try:
+            # XXX Should pass chain to export_tx to help parse scripts.
+            tx = abe.store.export_tx(tx_hash = tx_hash, format = 'browser')
+        except DataStore.MalformedHash:
+            body += ['<p class="error">Not in correct format.</p>']
+            return
+
+        if tx is None:
             body += ['<p class="error">Transaction not found.</p>']
             return
-        tx_id, tx_version, tx_lockTime, tx_size = (
-            int(row[0]), int(row[1]), int(row[2]), int(row[3]))
-        tx_comment = str(row[4])
 
         return abe.show_tx(page, tx)
 
@@ -759,9 +757,8 @@ class Abe:
                                      (tx['value_in'] and tx['value_out'] and
                                       tx['value_in'] - tx['value_out']), chain),
             '<br />\n',
-            '<a href="../rawtx/', tx_hash, '">Raw transaction</a><br /><br />\n',
-	    '<u>Transaction Comment:</u><br />', tx_comment]
-
+            '<a href="../rawtx/', tx['hash'], '">Raw transaction</a><br /><br />\n',
+	    '<u>Transaction Comment:</u><br />', tx['comment']]
         body += ['</p>\n',
                  '<a name="inputs"><h3>Inputs</h3></a>\n<table>\n',
                  '<tr><th>Index</th><th>Previous output</th><th>Amount</th>',
