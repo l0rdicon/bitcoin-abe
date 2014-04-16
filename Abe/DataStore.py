@@ -1904,7 +1904,7 @@ store._ddl['txout_approx'],
 
         if tx_id is not None:
             row = store.selectrow("""
-                SELECT tx_hash, tx_version, tx_lockTime, tx_size
+                SELECT tx_hash, tx_version, tx_lockTime, tx_size, tx_comment
                   FROM tx
                  WHERE tx_id = ?
             """, (tx_id,))
@@ -1914,7 +1914,7 @@ store._ddl['txout_approx'],
 
         elif tx_hash is not None:
             row = store.selectrow("""
-                SELECT tx_id, tx_version, tx_lockTime, tx_size
+                SELECT tx_id, tx_version, tx_lockTime, tx_size, tx_comment
                   FROM tx
                  WHERE tx_hash = ?
             """, (store.hashin_hex(tx_hash),))
@@ -1929,6 +1929,7 @@ store._ddl['txout_approx'],
         tx['version' if is_bin else 'ver']        = int(row[1])
         tx['lockTime' if is_bin else 'lock_time'] = int(row[2])
         tx['size'] = int(row[3])
+	tx['tx-comment'] = str(row[4])
 
         txins = []
         tx['txIn' if is_bin else 'in'] = txins
