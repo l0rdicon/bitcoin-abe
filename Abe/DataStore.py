@@ -477,7 +477,7 @@ class DataStore(object):
         return store.chains_by.name.get(name, None)
 
     def get_default_chain(store):
-        store.log.debug("Falling back to default (Bitcoin) policy.")
+        store.log.debug("Falling back to default (Clam) policy.")
         return Chain.create(None)
 
     def get_ddl(store, key):
@@ -1712,14 +1712,15 @@ store._ddl['txout_approx'],
             'version':               block_version,
             }
 
-        #is_stake_chain = chain is not None and chain.has_feature('nvc_proof_of_stake')
-	is_stake_chain = True
+            # Proof-of-stake display based loosely on CryptoManiac/novacoin and
+            # http://nvc.cryptocoinexplorer.com.
+        is_stake_chain = True
         if is_stake_chain:
             # Proof-of-stake display based loosely on CryptoManiac/novacoin and
             # http://nvc.cryptocoinexplorer.com.
             b['is_proof_of_stake'] = len(tx_ids) > 1 and coinbase_tx['total_out'] == 0
-
-        for tx_id in tx_ids[1:]:
+        
+	for tx_id in tx_ids[1:]:
             tx = txs[tx_id]
             tx['fees'] = tx['total_in'] - tx['total_out']
 
@@ -2026,11 +2027,12 @@ store._ddl['txout_approx'],
              ORDER BY cc.chain_id, cc.in_longest DESC, b.block_hash
         """, (tx_id,)))
 
-        if chain is None:
-            if len(tx['chain_candidates']) > 0:
-                chain = tx['chain_candidates'][0]['chain']
-            else:
-                chain = store.get_default_chain()
+	if chain is None:
+	    if len(tx['chain_candidates']) > 0:
+	        chain = tx['chain_candidates'][0]['chain']
+	    else:
+	        chain = store.get_chain_by_id(1)
+                #chain = store.get_default_chain()
 
         def parse_row(row):
             pos, script, value, o_hash, o_pos = row[:5]
