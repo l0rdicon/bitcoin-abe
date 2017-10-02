@@ -706,7 +706,7 @@ store._ddl['configvar'],
     tx_version    NUMERIC(10),
     tx_lockTime   NUMERIC(10),
     tx_size       NUMERIC(10),
-    tx_comment    VARCHAR(160) NULL
+    tx_comment    text NULL
 )""",
 
 # Presence of transactions in blocks is many-to-many.

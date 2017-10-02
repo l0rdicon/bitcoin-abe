@@ -627,8 +627,8 @@ class Abe:
             body += ['<tr><td>Average Coin Age</td><td>',(b['satoshi_seconds'] / 86400.0 / b['chain_satoshis']),' days']
         if b['satoshis_destroyed'] is not None:
             body += ['<tr><td>Coin-days Destroyed</td><td>',format_satoshis(b['satoshis_destroyed'] / 86400.0, chain),'</td></tr>']
-        if b['chain_satoshi_seconds'] is not None:
-            body += ['<tr><td>Cumulative Coin-days Destroyed</td><td>',(100 * (1 - float(b['satoshi_seconds']) / b['chain_satoshi_seconds']))]
+        ## if b['chain_satoshi_seconds'] is not None:
+        ##     body += ['<tr><td>Cumulative Coin-days Destroyed</td><td>',(100 * (1 - float(b['satoshi_seconds']) / b['chain_satoshi_seconds']))]
         body += ['<tr><td>Short Link</td><td>', abe.short_link(page, 'b/' + block_shortlink(b['hash'])), '</td></tr>']
         body += ['</tbody></table></div>']
 
